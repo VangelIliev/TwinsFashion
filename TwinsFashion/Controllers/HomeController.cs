@@ -4,6 +4,7 @@ using TwinsFashion.Models;
 using TwinsFashion.Services;
 using Microsoft.AspNetCore.Http;
 using System.Text.Json;
+using Domain.Interfaces;
 
 namespace TwinsFashion.Controllers
 {
@@ -11,19 +12,36 @@ namespace TwinsFashion.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IEmailSender _emailSender;
-        public HomeController(ILogger<HomeController> logger, IEmailSender emailSender)
+        private readonly IProductService _productService;
+        public HomeController(ILogger<HomeController> logger, IEmailSender emailSender, IProductService productService)
         {
             _logger = logger;
             _emailSender = emailSender;
+            _productService = productService;
         }
 
         public IActionResult Index()
         {
             return View();
         }
-        public IActionResult Products()
+        public async IActionResult Products()
         {
-            return View();
+            var model = await _productService.GetAllProductsAsync();
+            if (model == null || !model.Any())
+            {
+                return View("NoProducts");
+            }
+            var productViewModels = model.Select(p => new ProductViewModel
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Category = p.Category.Name,
+                Color = p.Color.Name,
+                Size = p.Size,
+                Price = p.Price,
+                Description = p.Description
+            }).ToList();
+            return View(model);
         }
 
         public IActionResult About()
