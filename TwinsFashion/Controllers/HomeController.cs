@@ -1,10 +1,11 @@
-using System.Diagnostics;
+using AutoMapper;
+using Data.Models;
+using Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using System.Text.Json;
 using TwinsFashion.Models;
 using TwinsFashion.Services;
-using Microsoft.AspNetCore.Http;
-using System.Text.Json;
-using Domain.Interfaces;
 
 namespace TwinsFashion.Controllers
 {
@@ -13,34 +14,31 @@ namespace TwinsFashion.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IEmailSender _emailSender;
         private readonly IProductService _productService;
-        public HomeController(ILogger<HomeController> logger, IEmailSender emailSender, IProductService productService)
+        private readonly IMapper _mapper;
+        public HomeController(
+            ILogger<HomeController> logger, 
+            IEmailSender emailSender, 
+            IProductService productService, 
+            IMapper mapper)
         {
             _logger = logger;
             _emailSender = emailSender;
             _productService = productService;
+            _mapper = mapper;
         }
 
         public IActionResult Index()
         {
             return View();
         }
-        public async IActionResult Products()
+        public async Task<IActionResult> Products()
         {
             var model = await _productService.GetAllProductsAsync();
             if (model == null || !model.Any())
             {
                 return View("NoProducts");
             }
-            var productViewModels = model.Select(p => new ProductViewModel
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Category = p.Category.Name,
-                Color = p.Color.Name,
-                Size = p.Size,
-                Price = p.Price,
-                Description = p.Description
-            }).ToList();
+            var productsViewmodel = _mapper.Map<IEnumerable<ProductViewModel>>(model);
             return View(model);
         }
 
@@ -50,19 +48,17 @@ namespace TwinsFashion.Controllers
         }
 
         [HttpGet]
-        public IActionResult Product(string name)
+        public async Task<IActionResult> Product(Guid id)
         {
-            var product = new ProductViewModel
+            var product = await _productService.GetProductByIdAsync(id);
+            if (product == null)
             {
-                Id = 1,
-                Name = name,
-                Category = "Category1",
-                Color = "Red",
-                Size = "M",
-                Price = 49.99m,
-                Description = "This is a sample product description."
-            };
-            return View("ProductDetails", product);
+                _logger.LogWarning("Product with ID {Id} not found.", id);
+                return NotFound();
+            }
+
+            var productViewModel = _mapper.Map<ProductViewModel>(product);
+            return View("ProductDetails", productViewModel);
         }
         public IActionResult Contacts()
         {

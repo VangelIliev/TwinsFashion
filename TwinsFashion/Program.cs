@@ -5,10 +5,18 @@ using Microsoft.EntityFrameworkCore;
 using Data.Models;
 using Domain.Interfaces;
 using Domain.Implementation;
-using Domain.Mappings;
-var builder = WebApplication.CreateBuilder(args);
+using TwinsFashion.Models.Mappings;
 
-// Add services to the container.
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/log.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+var builder = WebApplication.CreateBuilder(args);
+//serilog
+builder.Host.UseSerilog();
+
+//Services
 builder.Services.AddControllersWithViews();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<IEmailSender, EmailSender>();
@@ -24,7 +32,6 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 app.UseSession();

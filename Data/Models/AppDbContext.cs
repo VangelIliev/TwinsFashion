@@ -17,6 +17,9 @@ namespace Data.Models
 
         public DbSet<User> Users { get; set; }
 
+        public DbSet<Size> Sizes { get; set; }
+
+        public DbSet<SubCategory> SubCategories { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -26,8 +29,30 @@ namespace Data.Models
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Category>()
+            .HasMany(c => c.SubCategories)
+            .WithOne(sc => sc.Category)
+            .HasForeignKey(sc => sc.CategoryId);
+
+            modelBuilder.Entity<SubCategory>()
+                .HasMany(sc => sc.Products)
+                .WithOne(p => p.SubCategory)
+                .HasForeignKey(p => p.SubCategoryId);
+
             modelBuilder.Entity<OrderProduct>()
                 .HasKey(op => new { op.OrderId, op.ProductId });
+
+
+            modelBuilder.Entity<Product>()
+                .HasMany(p => p.Sizes)
+                .WithMany(s => s.Products);
+
+            // Fix: Set delete behavior to Restrict or NoAction for SubCategory
+            modelBuilder.Entity<Product>()
+                .HasOne(p => p.SubCategory)
+                .WithMany(sc => sc.Products)
+                .HasForeignKey(p => p.SubCategoryId)
+                .OnDelete(DeleteBehavior.Restrict); // or .NoAction
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -58,6 +83,20 @@ namespace Data.Models
                             new Color { Id = Guid.NewGuid(), Name = "Деним" },
                             new Color { Id = Guid.NewGuid(), Name = "Кафяв" },
                             new Color { Id = Guid.NewGuid(), Name = "Розов" }
+                        );
+                        context.SaveChanges();
+                    }
+
+                    if (!context.Set<Size>().Any())
+                    {
+                        context.Set<Size>().AddRange(
+                            new Size { Id = Guid.NewGuid(), Name = "XS" },
+                            new Size { Id = Guid.NewGuid(), Name = "S" },
+                            new Size { Id = Guid.NewGuid(), Name = "M" },
+                            new Size { Id = Guid.NewGuid(), Name = "L" },
+                            new Size { Id = Guid.NewGuid(), Name = "XL" },
+                            new Size { Id = Guid.NewGuid(), Name = "XXL" },
+                            new Size { Id = Guid.NewGuid(), Name = "XXXL" }
                         );
                         context.SaveChanges();
                     }

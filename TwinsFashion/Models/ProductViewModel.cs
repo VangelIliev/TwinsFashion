@@ -9,7 +9,7 @@ namespace TwinsFashion.Models
             this.ImageUrls = [];    
         }
         
-        public required int Guid { get; set; }
+        public required Guid Id { get; set; }
         public required string Name { get; set; }
         public required string Description { get; set; }
         public required decimal Price { get; set; }
