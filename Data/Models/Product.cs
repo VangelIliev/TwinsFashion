@@ -26,10 +26,6 @@ namespace Data.Models
 
         public  Category Category { get; set; }
 
-        [MinLength(1)]
-        [MaxLength(2)]
-        public required string Size { get; set; }
-
         public Guid SubCategoryId { get; set; }
         public SubCategory SubCategory { get; set; }
 

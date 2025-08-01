@@ -72,6 +72,21 @@ namespace Data.Models
                         );
                         context.SaveChanges();
                     }
+                    if(!context.Set<SubCategory>().Any())
+                    {
+                        context.Set<SubCategory>().AddRange(
+                            new SubCategory { Id = Guid.NewGuid(), Name = "Ризи", CategoryId = context.Set<Category>().First(c => c.Name == "Мъжко").Id },
+                            new SubCategory { Id = Guid.NewGuid(), Name = "Елегантен Панталон", CategoryId = context.Set<Category>().First(c => c.Name == "Мъжко").Id },
+                            new SubCategory { Id = Guid.NewGuid(), Name = "Тениски", CategoryId = context.Set<Category>().First(c => c.Name == "Мъжко").Id },
+                            new SubCategory { Id = Guid.NewGuid(), Name = "Спортен Панталон", CategoryId = context.Set<Category>().First(c => c.Name == "Мъжко").Id },
+                            new SubCategory { Id = Guid.NewGuid(), Name = "Панталони", CategoryId = context.Set<Category>().First(c => c.Name == "Дамско").Id },
+                            new SubCategory { Id = Guid.NewGuid(), Name = "Тениски", CategoryId = context.Set<Category>().First(c => c.Name == "Дамско").Id },
+                            new SubCategory { Id = Guid.NewGuid(), Name = "Сака", CategoryId = context.Set<Category>().First(c => c.Name == "Дамско").Id },
+                            new SubCategory { Id = Guid.NewGuid(), Name = "Ризи", CategoryId = context.Set<Category>().First(c => c.Name == "Дамско").Id },
+                            new SubCategory { Id = Guid.NewGuid(), Name = "Комплекти", CategoryId = context.Set<Category>().First(c => c.Name == "Дамско").Id }
+                        );
+                        context.SaveChanges();
+                    }
                     // Seed Colors
                     if (!context.Set<Color>().Any())
                     {
@@ -86,7 +101,6 @@ namespace Data.Models
                         );
                         context.SaveChanges();
                     }
-
                     if (!context.Set<Size>().Any())
                     {
                         context.Set<Size>().AddRange(
@@ -95,8 +109,8 @@ namespace Data.Models
                             new Size { Id = Guid.NewGuid(), Name = "M" },
                             new Size { Id = Guid.NewGuid(), Name = "L" },
                             new Size { Id = Guid.NewGuid(), Name = "XL" },
-                            new Size { Id = Guid.NewGuid(), Name = "XXL" },
-                            new Size { Id = Guid.NewGuid(), Name = "XXXL" }
+                            new Size { Id = Guid.NewGuid(), Name = "2XL" },
+                            new Size { Id = Guid.NewGuid(), Name = "3XL" }
                         );
                         context.SaveChanges();
                     }

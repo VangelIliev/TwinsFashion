@@ -29,6 +29,17 @@ namespace TwinsFashion.Controllers
 
         public IActionResult Index()
         {
+            _productService.SeedProductToDatabase(
+                "Clothes",
+                "Black",
+                "T-Shirts",
+                new List<Size>
+                {
+                    new Size { Name = "S" },
+                    new Size { Name = "M" },
+                    new Size { Name = "L" },
+                    new Size { Name = "XL" }
+                }).GetAwaiter().GetResult();
             return View();
         }
         public async Task<IActionResult> Products()

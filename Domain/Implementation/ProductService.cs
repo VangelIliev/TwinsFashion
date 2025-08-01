@@ -4,7 +4,6 @@ using Domain.Interfaces;
 using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Drawing;
 
 namespace Domain.Implementation
 {
@@ -67,41 +66,180 @@ namespace Domain.Implementation
             }
         }
 
-        public async Task<bool> SeedProductToDatabase()
+        public async Task<IEnumerable<string>> GetSubCategories()
         {
             try
             {
-                var images = new List<Image>();
-                var guid = Guid.NewGuid();
-                images.Add(new Image
+                var subCategories = await _context.SubCategories
+                    .Select(sc => sc.Name)
+                    .ToListAsync();
+                if (subCategories == null || !subCategories.Any())
                 {
-                    Id = Guid.NewGuid(),
-                    ProductId = guid,
-                    Url = ""
-                });
+                    _logger.LogWarning("No subcategories found in the database.");
+                    return Enumerable.Empty<string>();
+                }
+                return subCategories;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving subcategories.");
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<string>> GetColors()
+        {
+            try
+            {
+                var colors = await _context.Colors
+                    .Select(c => c.Name)
+                    .ToListAsync();
+                if (colors == null || !colors.Any())
+                {
+                    _logger.LogWarning("No colors found in the database.");
+                    return Enumerable.Empty<string>();
+                }
+                return colors;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving colors.");
+                throw;
+            }
+        }
+        public async Task<IEnumerable<string>> GetCategories()
+        {
+            try
+            {
+                var categories = await _context.Categories
+                    .Select(c => c.Name)
+                    .ToListAsync();
+                if (categories == null || !categories.Any())
+                {
+                    _logger.LogWarning("No categories found in the database.");
+                    return Enumerable.Empty<string>();
+                }
+                return categories;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving categories.");
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<Size>> GetSizes()
+        {
+            try
+            {
+                var sizes = await _context.Sizes.ToListAsync();
+                if (sizes == null || !sizes.Any())
+                {
+                    _logger.LogWarning("No sizes found in the database.");
+                    return Enumerable.Empty<Size>();
+                }
+                return sizes;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving sizes.");
+                throw;
+            }
+        }
+        public async Task<bool> SeedProductToDatabase(string categoryName, string colorName, string subcategoryName, List<Size> sizes)
+        {
+            try
+            {
+                // 1. Get related entities
+                var category = await _context.Categories.FirstAsync(x => x.Name == categoryName);
+                var color = await _context.Colors.FirstAsync(x => x.Name == colorName);
+                var subCategory = await _context.SubCategories.FirstAsync(x => x.Name == subcategoryName);
+
+                // 2. Create product and images
+                var productId = Guid.NewGuid();
+                var images = new List<Image>
+                {
+                    new Image
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = productId,
+                        Url = "/images/pants/Elizabeth_Franchie_Pants.jpg"
+                    }
+                };
 
                 var product = new Product
                 {
-                    Id = Guid.NewGuid(),
-                    Name = "Панталон Елизабет Франчи",
-                    Description = "Продукта е много стилен",
+                    Id = productId,
+                    Name = "Панталон Елизабетa Франчи",
+                    Description = "Летен панталон от памук и еластан",
                     Price = 110,
                     Quantity = 10,
-                    CategoryId = Guid.Parse("82C46B11-C584-4896-BCE4-DCF3413D3AC6"),
-                    ColorId = Guid.Parse("5F45E5B5-97A7-45B2-8400-4CFDA5639C0A"),
-                    Size = "M",
-                    Images = images
+                    CategoryId = category.Id,
+                    Category = category,
+                    ColorId = color.Id,
+                    Color = color,
+                    SubCategoryId = subCategory.Id,
+                    SubCategory = subCategory,
+                    Images = images,
+                    Sizes = sizes
                 };
 
                 _context.Products.Add(product);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
 
                 return true;
-
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while seeding products.");
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<ProductDto>> GetProductsByCategoryAsync(string categoryName)
+        {
+            try
+            {
+                var products = await _context.Products
+                    .Include(p => p.Category)
+                    .Include(p => p.Color)
+                    .Include(p => p.Images)
+                    .Where(p => p.Category.Name == categoryName)
+                    .ToListAsync();
+                if (products == null || !products.Any())
+                {
+                    _logger.LogWarning("No products found for category {CategoryName}.", categoryName);
+                    return Enumerable.Empty<ProductDto>();
+                }
+                return _mapper.Map<IEnumerable<ProductDto>>(products);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving products by category {CategoryName}.", categoryName);
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<ProductDto>> GetProductsByColorAsync(string colorName)
+        {
+            try
+            {
+                var products = await _context.Products
+                    .Include(p => p.Category)
+                    .Include(p => p.Color)
+                    .Include(p => p.Images)
+                    .Where(p => p.Color.Name == colorName)
+                    .ToListAsync();
+                if (products == null || !products.Any())
+                {
+                    _logger.LogWarning("No products found for color {ColorName}.", colorName);
+                    return Enumerable.Empty<ProductDto>();
+                }
+                return _mapper.Map<IEnumerable<ProductDto>>(products);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving products by color {ColorName}.", colorName);
                 throw;
             }
         }

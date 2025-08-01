@@ -21,7 +21,6 @@ namespace TwinsFashion.Models.Mappings
                 .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
                 .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price))
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.Name))
-                .ForMember(dest => dest.Size, opt => opt.MapFrom(src => src.Size))
                 .ForMember(dest => dest.Color, opt => opt.MapFrom(src => src.Color.Name))
                 .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images.Select(i => i.Url).ToList()));
 
@@ -32,7 +31,6 @@ namespace TwinsFashion.Models.Mappings
                 .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
                 .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price))
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.Name))
-                .ForMember(dest => dest.Size, opt => opt.MapFrom(src => src.Size))
                 .ForMember(dest => dest.Color, opt => opt.MapFrom(src => src.Color.Name))
                 .ForMember(dest => dest.ImageUrls, opt => opt.MapFrom(src => src.Images.Select(i => i.Url).ToList()));
         }

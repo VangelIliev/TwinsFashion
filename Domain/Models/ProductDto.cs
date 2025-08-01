@@ -17,8 +17,6 @@ namespace Domain.Models
 
         public required Category Category { get; set; }
 
-        public required string Size { get; set; }
-
         public Guid ColorId { get; set; }
 
         public required Color Color { get; set; }
