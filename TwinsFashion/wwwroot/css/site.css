@@ -1523,12 +1523,14 @@ Input, textarea : 14px/1.6 '', Arial, sans-serif;
     -moz-transition: all 0.4s;
     transition: all 0.4s;
 }
+
 .map-container {
     display: flex;
     justify-content: center;
     align-items: center;
     margin: 40px 0;
 }
+
 button.mfp-arrow-right {
     background-image: url(~/images/icons/icon-next.png);
     background-position: center center;

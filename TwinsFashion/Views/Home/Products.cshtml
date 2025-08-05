@@ -1,6 +1,12 @@
-﻿@model List<ProductViewModel>
-@await Html.PartialAsync("_Header", null, new ViewDataDictionary(ViewData) { { "ActivePage", "Products" } })
-@await Html.PartialAsync("_Cart")
+﻿@model IEnumerable<ProductViewModel>
+
+@{
+
+    var headerViewData = new ViewDataDictionary(ViewData) { { "ActivePage", "Products" } };
+    var categories = ViewData["Categories"] as IEnumerable<string>;
+
+    @await Html.PartialAsync("_Header", null, headerViewData);
+}
 <!-- Product -->
 <div class="bg0 m-t-23 p-b-140">
     <div class="container">
@@ -9,32 +15,12 @@
                 <button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5 how-active1" data-filter="*">
                     Всички продукти
                 </button>
-
-                <button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".women">
-                    Дамско
-                </button>
-
-                <button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".men">
-                    Мъжко
-                </button>
-
-                <button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".shoes">
-                    Обувки
-                </button>
-            </div>
-
-            <div class="flex-w flex-c-m m-tb-10">
-                <div class="flex-c-m stext-106 cl6 size-104 bor4 pointer hov-btn3 trans-04 m-r-8 m-tb-4 js-show-filter">
-                    <i class="icon-filter cl2 m-r-6 fs-15 trans-04 zmdi zmdi-filter-list"></i>
-                    <i class="icon-close-filter cl2 m-r-6 fs-15 trans-04 zmdi zmdi-close dis-none"></i>
-                    Филтрирай
-                </div>
-
-                <div class="flex-c-m stext-106 cl6 size-105 bor4 pointer hov-btn3 trans-04 m-tb-4 js-show-search">
-                    <i class="icon-search cl2 m-r-6 fs-15 trans-04 zmdi zmdi-search"></i>
-                    <i class="icon-close-search cl2 m-r-6 fs-15 trans-04 zmdi zmdi-close dis-none"></i>
-                    Търсачка
-                </div>
+                @foreach (var category in categories)
+                {
+                    <button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter="{category}">
+                        @category
+                    </button>
+                }
             </div>
 
             <!-- Search product -->
@@ -195,19 +181,19 @@
                         <div class="block2-pic hov-img0">
                             <img src="@(product.ImageUrls != null && product.ImageUrls.Count > 0 ? product.ImageUrls[0] : "~/images/product-01.jpg")" alt="IMG-PRODUCT">
 
-                            <a asp-controller="Home" asp-action="Product" asp-route-name="@product.Name" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
+                            <a asp-controller="Home" asp-action="Product" asp-route-name="@product.Id" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
                                 Бърз преглед
                             </a>
                         </div>
 
                         <div class="block2-txt flex-w flex-t p-t-14">
                             <div class="block2-txt-child1 flex-col-l ">
-                                <a asp-controller="Home" asp-action="Product" asp-route-name="@product.Name" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+                                <a asp-controller="Home" asp-action="Product" asp-route-id="@product.Id" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
                                     @product.Name
                                 </a>
 
                                 <span class="stext-105 cl3">
-                                    @product.Price.ToString("C")
+                                  Цена : @product.Price.ToString() лв
                                 </span>
                             </div>
                         </div>
@@ -258,7 +244,6 @@
                                         </a>
                                     </div>
                                 </div>
-
                                 <div class="item-slick3" data-thumb="~/images/product-detail-02.jpg">
                                     <div class="wrap-pic-w pos-relative">
                                         <img src="~/images/product-detail-02.jpg" alt="IMG-PRODUCT">
@@ -281,130 +266,8 @@
                             </div>
                         </div>
                     </div>
-                </div>
-               @*  <form asp-action="AddToCart" asp-controller="Home" method="post">
-                    <input asp-for="Name" type="hidden" />
-                    <input asp-for="Price" type="hidden" />
-
-                    <div>
-                        <label>Размер</label>
-                        <select asp-for="Size" class="form-control">
-                            <option value="">Избери опция</option>
-                            <option value="S">Размер S</option>
-                            <option value="M">Размер M</option>
-                            <option value="L">Размер L</option>
-                            <option value="XL">Размер XL</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label>Цвят</label>
-                        <select asp-for="Color" class="form-control">
-                            <option value="">Избери опция</option>
-                            <option value="Червен">Червен</option>
-                            <option value="Син">Син</option>
-                            <option value="Бял">Бял</option>
-                            <option value="Сив">Сив</option>
-                        </select>
-                    </div>
-
-                    <button type="submit" class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail">
-                        Добави в количката
-                    </button>
-                </form>
-                <div class="col-md-6 col-lg-5 p-b-30">
-                    <div class="p-r-50 p-t-5 p-lr-0-lg">
-                        <h4 class="mtext-105 cl2 js-name-detail p-b-14">
-                            <input asp-for="Name" hidden />
-                            Име
-                        </h4>
-
-                        <span class="mtext-106 cl2">
-                            <input asp-for="Price" hidden />
-                            Price
-                        </span>
-
-                        <p class="stext-102 cl3 p-t-23">
-                            Някакъв текст
-                        </p>
-
-                        <!--  -->
-                        <div class="p-t-33">
-                            <div class="flex-w flex-r-m p-b-10">
-                                <div class="size-203 flex-c-m respon6">
-                                    Размер
-                                </div>
-
-                                <div class="size-204 respon6-next">
-                                    <div class="rs1-select2 bor8 bg0">
-                                        <select class="js-select2" name="time">
-                                            <option>Избери опция</option>
-                                            <option>Размер S</option>
-                                            <option>Размер M</option>
-                                            <option>Размер L</option>
-                                            <option>Размер XL</option>
-                                        </select>
-                                        <div class="dropDownSelect2"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="flex-w flex-r-m p-b-10">
-                                <div class="size-203 flex-c-m respon6">
-                                    Цвят
-                                </div>
-
-                                <div class="size-204 respon6-next">
-                                    <div class="rs1-select2 bor8 bg0">
-                                        <select class="js-select2" name="time">
-                                            <option>Избери опция</option>
-                                            <option>Червен</option>
-                                            <option>Син</option>
-                                            <option>Бял</option>
-                                            <option>Сив</option>
-                                        </select>
-                                        <div class="dropDownSelect2"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="flex-w flex-r-m p-b-10">
-                                <div class="size-204 flex-w flex-m respon6-next">
-                                    <div class="wrap-num-product flex-w m-r-20 m-tb-10">
-                                        <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
-                                            <i class="fs-16 zmdi zmdi-minus"></i>
-                                        </div>
-
-                                        <input class="mtext-104 cl3 txt-center num-product" type="number" name="num-product" value="1">
-
-                                        <div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m">
-                                            <i class="fs-16 zmdi zmdi-plus"></i>
-                                        </div>
-                                    </div>
-
-                                    <button type="submit" class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail">
-                                        Добави в количката
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!--  -->
-                        <div class="flex-w flex-m p-l-100 p-t-40 respon7">
-                            <div class="flex-m bor9 p-r-10 m-r-11">
-                            </div>
-
-                            <a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Facebook">
-                                <i class="fa fa-facebook"></i>
-                            </a>
-
-                            <a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Twitter">
-                                <i class="fa fa-twitter"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div> *@
+                </div>              
         </div>
     </div>
+</div>
 </div>

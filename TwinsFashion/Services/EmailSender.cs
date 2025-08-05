@@ -57,7 +57,7 @@ namespace TwinsFashion.Services
                 foreach (var product in products)
                 {
                     stringBuilder.AppendLine($"Име на продукт: {product.Name} <br>");
-                    stringBuilder.AppendLine($"Тип на продукт : {product.Category}, Цвят {product.Color}, размер {product.Size}, Цена {product.Price}");
+                    stringBuilder.AppendLine($"Тип на продукт : {product.Category}, Цвят {product.Color}, Цена {product.Price}");
                 }
 
                 stringBuilder.AppendLine($" <br> <br> <b>Обща сума на поръчката:</b> {products.Sum(p => p.Price)} лв.");

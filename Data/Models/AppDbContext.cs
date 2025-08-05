@@ -21,6 +21,8 @@ namespace Data.Models
 
         public DbSet<SubCategory> SubCategories { get; set; }
 
+        public DbSet<AdminUser> AdminUsers { get; set; }
+
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }

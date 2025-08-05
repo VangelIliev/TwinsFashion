@@ -1,6 +1,6 @@
-﻿using AutoMapper;
-using Data.Models;
+﻿using Data.Models;
 using Domain.Interfaces;
+using Domain.Mappers;
 using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -10,10 +10,10 @@ namespace Domain.Implementation
     public class ProductService : IProductService
     {
         private readonly AppDbContext _context;
-        private readonly IMapper _mapper;
+        private readonly IDomainMapper _mapper;
         private readonly ILogger<ProductService> _logger;
 
-        public ProductService(AppDbContext context, IMapper mapper, ILogger<ProductService> logger)
+        public ProductService(AppDbContext context, IDomainMapper mapper, ILogger<ProductService> logger)
         {
             _context = context;
             _mapper = mapper;
@@ -27,13 +27,15 @@ namespace Domain.Implementation
                 var dataProducts = await _context.Products
                 .Include(p => p.Category)
                 .Include(p => p.Color)
-                .Include(p => p.Images).ToListAsync();
+                .Include(p => p.Images)
+                .Include(p => p.Sizes)
+                .ToListAsync();
                 if (dataProducts == null || !dataProducts.Any())
                 {
                     _logger.LogError("No products found in the database.");
                     return Enumerable.Empty<ProductDto>();
                 }
-                return _mapper.Map<IEnumerable<ProductDto>>(dataProducts);
+                return _mapper.MapDomainProducts(dataProducts);
             }
             catch (Exception ex)
             {
@@ -50,6 +52,7 @@ namespace Domain.Implementation
                     .Include(p => p.Category)
                     .Include(p => p.Color)
                     .Include(p => p.Images)
+                    .Include(p => p.Sizes)
                     .FirstOrDefaultAsync(p => p.Id == id);
 
                 if (dataProduct == null)
@@ -57,7 +60,7 @@ namespace Domain.Implementation
                     _logger.LogWarning("Product with ID {Id} not found.", id);
                     return null;
                 }
-                return _mapper.Map<ProductDto>(dataProduct);
+                return _mapper.MapDomainProductDto(dataProduct);
             }
             catch (Exception ex)
             {
@@ -66,19 +69,17 @@ namespace Domain.Implementation
             }
         }
 
-        public async Task<IEnumerable<string>> GetSubCategories()
+        public async Task<IEnumerable<SubCategoryDto>> GetSubCategories()
         {
             try
             {
-                var subCategories = await _context.SubCategories
-                    .Select(sc => sc.Name)
-                    .ToListAsync();
+                var subCategories = await _context.SubCategories.ToListAsync();
                 if (subCategories == null || !subCategories.Any())
                 {
                     _logger.LogWarning("No subcategories found in the database.");
-                    return Enumerable.Empty<string>();
+                    return [];
                 }
-                return subCategories;
+                return _mapper.MapDomainSubCategories(subCategories);
             }
             catch (Exception ex)
             {
@@ -87,19 +88,17 @@ namespace Domain.Implementation
             }
         }
 
-        public async Task<IEnumerable<string>> GetColors()
+        public async Task<IEnumerable<ColorDto>> GetColors()
         {
             try
             {
-                var colors = await _context.Colors
-                    .Select(c => c.Name)
-                    .ToListAsync();
+                var colors = await _context.Colors.ToListAsync();
                 if (colors == null || !colors.Any())
                 {
                     _logger.LogWarning("No colors found in the database.");
-                    return Enumerable.Empty<string>();
+                    return [];
                 }
-                return colors;
+                return _mapper.MapDomainColors(colors);
             }
             catch (Exception ex)
             {
@@ -107,19 +106,17 @@ namespace Domain.Implementation
                 throw;
             }
         }
-        public async Task<IEnumerable<string>> GetCategories()
+        public async Task<IEnumerable<CategoryDto>> GetCategories()
         {
             try
             {
-                var categories = await _context.Categories
-                    .Select(c => c.Name)
-                    .ToListAsync();
+                var categories = await _context.Categories.ToListAsync();
                 if (categories == null || !categories.Any())
                 {
                     _logger.LogWarning("No categories found in the database.");
-                    return Enumerable.Empty<string>();
+                    return [];
                 }
-                return categories;
+                return _mapper.MapDomainCategories(categories);
             }
             catch (Exception ex)
             {
@@ -128,7 +125,7 @@ namespace Domain.Implementation
             }
         }
 
-        public async Task<IEnumerable<Size>> GetSizes()
+        public async Task<IEnumerable<SizeDto>> GetSizes()
         {
             try
             {
@@ -136,9 +133,9 @@ namespace Domain.Implementation
                 if (sizes == null || !sizes.Any())
                 {
                     _logger.LogWarning("No sizes found in the database.");
-                    return Enumerable.Empty<Size>();
+                    return [];
                 }
-                return sizes;
+                return _mapper.MapDomainSizes(sizes);
             }
             catch (Exception ex)
             {
@@ -211,7 +208,7 @@ namespace Domain.Implementation
                     _logger.LogWarning("No products found for category {CategoryName}.", categoryName);
                     return Enumerable.Empty<ProductDto>();
                 }
-                return _mapper.Map<IEnumerable<ProductDto>>(products);
+                return _mapper.MapDomainProducts(products);
             }
             catch (Exception ex)
             {
@@ -230,12 +227,12 @@ namespace Domain.Implementation
                     .Include(p => p.Images)
                     .Where(p => p.Color.Name == colorName)
                     .ToListAsync();
-                if (products == null || !products.Any())
+                if (products == null || products.Count == 0)
                 {
                     _logger.LogWarning("No products found for color {ColorName}.", colorName);
                     return Enumerable.Empty<ProductDto>();
                 }
-                return _mapper.Map<IEnumerable<ProductDto>>(products);
+                return _mapper.MapDomainProducts(products);
             }
             catch (Exception ex)
             {

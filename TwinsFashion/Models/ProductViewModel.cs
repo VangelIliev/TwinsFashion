@@ -16,5 +16,10 @@ namespace TwinsFashion.Models
         public required string Category { get; set; }
         public string Color { get; set; }
         public List<string> ImageUrls { get; set; }
+
+        public ICollection<string> Sizes { get; set; }
+
+        public string Size { get; set; }
+        public int Quantity { get; set; } = 1;
     }
 }

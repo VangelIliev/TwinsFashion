@@ -11,11 +11,11 @@ namespace Domain.Interfaces
 
         Task<bool> SeedProductToDatabase(string categoryName, string colorName, string subcategoryName, List<Size> sizes);
 
-        Task<IEnumerable<string>> GetColors();
+        Task<IEnumerable<ColorDto>> GetColors();
 
-        Task<IEnumerable<string>> GetCategories();
+        Task<IEnumerable<CategoryDto>> GetCategories();
 
-        Task<IEnumerable<Size>> GetSizes();
+        Task<IEnumerable<SizeDto>> GetSizes();
 
         Task<IEnumerable<ProductDto>> GetProductsByCategoryAsync(string categoryName);
 

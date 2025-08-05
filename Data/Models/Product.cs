@@ -24,7 +24,7 @@ namespace Data.Models
 
         public Guid CategoryId { get; set; }
 
-        public  Category Category { get; set; }
+        public Category Category { get; set; }
 
         public Guid SubCategoryId { get; set; }
         public SubCategory SubCategory { get; set; }
