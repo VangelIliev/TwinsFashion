@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Domain.Interfaces;
-using TwinsFashion.Services;
 using System.Security.Claims;
+using TwinsFashion.Services;
+using Domain.Interfaces;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace TwinsFashion.Controllers
 {
@@ -21,9 +21,13 @@ namespace TwinsFashion.Controllers
         [HttpGet]
         public IActionResult LogIn()
         {
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                // If already authenticated, redirect to AdminProducts
+                return RedirectToAction("AllProducts", "Admin");
+            }
             return View();
         }
-
         [HttpPost]
         public async Task<IActionResult> LogIn(string username, string password)
         {
@@ -41,7 +45,7 @@ namespace TwinsFashion.Controllers
                     ExpiresUtc = DateTimeOffset.UtcNow.AddMonths(1)
                 };
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
-                return RedirectToAction("AllProducts");
+                return RedirectToAction("AllProducts", "Admin");
             }
             ModelState.AddModelError("", "Invalid username or password");
             return View();
@@ -52,7 +56,7 @@ namespace TwinsFashion.Controllers
         public async Task<IActionResult> AllProducts()
         {
             var products = await _productService.GetAllProductsAsync();
-            return View(products);
+            return View("AdminProducts",products);
         }
 
         [HttpPost]

@@ -7,6 +7,7 @@ using Domain.Interfaces;
 using Domain.Implementation;
 using TwinsFashion.Models.Mappings;
 using Domain.Mappers;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -22,6 +23,14 @@ builder.Services.AddControllersWithViews();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddSession();
+
+// Add authentication and cookie authentication
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Admin/LogIn";
+        options.LogoutPath = "/Admin/LogOut";
+    });
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
@@ -40,6 +49,8 @@ if (!app.Environment.IsDevelopment())
 app.UseSession();
 app.UseHttpsRedirection();
 app.UseRouting();
+// Add authentication middleware
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();

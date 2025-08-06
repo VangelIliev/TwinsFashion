@@ -22,4 +22,19 @@
     <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\images\products\men\longSleeve\" />
+    <Folder Include="wwwroot\images\products\men\jackets\" />
+    <Folder Include="wwwroot\images\products\men\shirts\" />
+    <Folder Include="wwwroot\images\products\men\pants\" />
+    <Folder Include="wwwroot\images\products\men\tshirts\" />
+    <Folder Include="wwwroot\images\products\shoes\" />
+    <Folder Include="wwwroot\images\products\women\clothingSets\" />
+    <Folder Include="wwwroot\images\products\women\dresses\" />
+    <Folder Include="wwwroot\images\products\women\jackets\" />
+    <Folder Include="wwwroot\images\products\women\tshirts\" />
+    <Folder Include="wwwroot\images\products\women\shirts\" />
+    <Folder Include="wwwroot\images\products\women\shoes\" />
+  </ItemGroup>
+
 </Project>
