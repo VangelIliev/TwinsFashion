@@ -2068,6 +2068,7 @@ input.num-product {
     -ms-transform: translateX(-50%);
     -o-transform: translateX(-50%);
     transform: translateX(-50%);
+    cursor: pointer;
 }
 
 .block2-pic:hover .block2-btn {
@@ -3551,7 +3552,7 @@ input.num-product {
 }
 
 
-/*//////////////////////////////////////////////////////////////////
+ /*//////////////////////////////////////////////////////////////////
 [ SM ]*/
 @media (max-width: 575px) {
     .m-0-sm {
@@ -3644,7 +3645,7 @@ input.num-product {
 }
 
 
-/*//////////////////////////////////////////////////////////////////
+ /*//////////////////////////////////////////////////////////////////
 [ SSM ]*/
 @media (max-width: 480px) {
     .m-0-ssm {

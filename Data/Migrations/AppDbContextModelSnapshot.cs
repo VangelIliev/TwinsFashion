@@ -236,17 +236,17 @@ namespace Data.Migrations
 
             modelBuilder.Entity("ProductSize", b =>
                 {
-                    b.Property<Guid>("ProductsId")
+                    b.Property<Guid>("ProductId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("SizesId")
+                    b.Property<Guid>("SizeId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("ProductsId", "SizesId");
+                    b.HasKey("ProductId", "SizeId");
 
-                    b.HasIndex("SizesId");
+                    b.HasIndex("SizeId");
 
-                    b.ToTable("ProductSize");
+                    b.ToTable("ProductSize", (string)null);
                 });
 
             modelBuilder.Entity("Data.Models.Image", b =>
@@ -332,15 +332,17 @@ namespace Data.Migrations
                 {
                     b.HasOne("Data.Models.Product", null)
                         .WithMany()
-                        .HasForeignKey("ProductsId")
+                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_ProductSize_Product_ProductId");
 
                     b.HasOne("Data.Models.Size", null)
                         .WithMany()
-                        .HasForeignKey("SizesId")
+                        .HasForeignKey("SizeId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_ProductSize_Size_SizeId");
                 });
 
             modelBuilder.Entity("Data.Models.Category", b =>

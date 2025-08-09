@@ -7,8 +7,8 @@
     $(".animsition").animsition({
         inClass: 'fade-in',
         outClass: 'fade-out',
-        inDuration: 1500,
-        outDuration: 800,
+        inDuration: 800,
+        outDuration: 400,
         linkElement: '.animsition-link',
         loading: true,
         loadingParentElement: 'html',
@@ -266,18 +266,5 @@
             }
         });
     });
-
-    /*==================================================================
-    [ Show modal1 ]*/
-    $('.js-show-modal1').on('click', function (e) {
-        e.preventDefault();
-        $('.js-modal1').addClass('show-modal1');
-    });
-
-    $('.js-hide-modal1').on('click', function () {
-        $('.js-modal1').removeClass('show-modal1');
-    });
-
-
 
 })(jQuery);

@@ -1,4 +1,6 @@
-﻿using Domain.Models;
+﻿using Data.Models;
+using Domain.Models;
+using Newtonsoft.Json;
 
 namespace TwinsFashion.Models.Mappings
 {
@@ -39,7 +41,7 @@ namespace TwinsFashion.Models.Mappings
                 Category = product.Category?.Name,
                 Color = product.Color?.Name,
                 ImageUrls = product.Images?.Select(i => i.Url).ToList() ?? new List<string>(),
-                Sizes = product.Sizes?.Select(x => x.Name).ToList() ?? new List<string>()
+                Sizes = MapViewModelSizes(product.Sizes)
             };
         }
 
@@ -55,20 +57,60 @@ namespace TwinsFashion.Models.Mappings
                 Price = product.Price,
                 Category = product.Category?.Name,
                 ImageUrls = product.Images?.Select(i => i.Url).ToList() ?? new List<string>(),
-                Sizes = product.Sizes.Select(x => x.Name).ToList() ?? new List<string>(),
+                Sizes = MapViewModelSizes(product.Sizes)
             });
         }
 
-        public IEnumerable<SizeViewModel> MapViewModelSizes(IEnumerable<SizeDto> sizes)
+        // Updated to extract 'size' from JSON string in Size.Name
+        public ICollection<string> MapViewModelSizes(ICollection<Size> sizes)
         {
             if (sizes == null)
-                return Enumerable.Empty<SizeViewModel>();
-            return sizes.Select(s => new SizeViewModel
+                return Enumerable.Empty<string>().ToList();
+
+            var result = new List<string>();
+            foreach (var s in sizes)
             {
-                Id = s.Id,
-                Name = s.Name
-            });
+                try
+                {
+                    var sizeObj = JsonConvert.DeserializeObject<Dictionary<string, string>>(s.Name);
+                    if (sizeObj != null && sizeObj.ContainsKey("size"))
+                    {
+                        result.Add(sizeObj["size"]);
+                    }
+                }
+                catch
+                {
+                    // Optionally log or handle malformed JSON
+                }
+            }
+            return result;
         }
+
+        public ICollection<string> MapViewModelSizes(IEnumerable<SizeDto> sizes)
+        {
+
+            if (sizes == null)
+                return Enumerable.Empty<string>().ToList();
+
+            var result = new List<string>();
+            foreach (var s in sizes)
+            {
+                try
+                {
+                    var sizeObj = JsonConvert.DeserializeObject<Dictionary<string, string>>(s.Name);
+                    if (sizeObj != null && sizeObj.ContainsKey("size"))
+                    {
+                        result.Add(sizeObj["size"]);
+                    }
+                }
+                catch
+                {
+                    // Optionally log or handle malformed JSON
+                }
+            }
+            return result;
+        }
+
 
         public IEnumerable<SubCategoryViewModel> MapViewModelSubCategories(IEnumerable<SubCategoryDto> subcategories)
         {

@@ -1,6 +1,7 @@
 ﻿using Data.Models;
 using Domain.Models;
-
+using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 namespace Domain.Mappers
 {
     public class DomainMapper : IDomainMapper
@@ -58,11 +59,18 @@ namespace Domain.Mappers
             {
                 return Enumerable.Empty<SizeDto>();
             }
-            return sizes.Select(s => new SizeDto
+            var sizeDtos = new List<SizeDto>();
+            foreach (var size in sizes)
             {
-                Id = s.Id,
-                Name = s.Name
-            });
+                // Deserialize the Name property (JSON) to SizeDto
+                var dto = JsonConvert.DeserializeObject<SizeDto>(size.Name);
+                if (dto != null)
+                {
+                    dto.Id = size.Id; // Set the Id from the entity
+                    sizeDtos.Add(dto);
+                }
+            }
+            return sizeDtos;
         }
 
         public IEnumerable<SubCategoryDto> MapDomainSubCategories(IEnumerable<SubCategory> subcategories)

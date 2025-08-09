@@ -1,8 +1,8 @@
 ﻿using Data.Models;
 using Domain.Interfaces;
+using Domain.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using System.Text.Json;
+using Newtonsoft.Json;
 using TwinsFashion.Models;
 using TwinsFashion.Models.Mappings;
 using TwinsFashion.Services;
@@ -49,6 +49,7 @@ namespace TwinsFashion.Controllers
 
         public IActionResult About()
         {
+            ViewData["basketQuantity"] = GetShoppingBasketCount();
             return View();
         }
 
@@ -78,10 +79,9 @@ namespace TwinsFashion.Controllers
             ViewData["basketQuantity"] = GetShoppingBasketCount();
             if (string.IsNullOrEmpty(shoppingBasket))
             {
-                // If there is no basket in session, show empty cart    
                 return View(new ShoppingBasketViewModel());
             }
-            var shoppingBasketModel = JsonSerializer.Deserialize<ShoppingBasketViewModel>(shoppingBasket);
+            var shoppingBasketModel = JsonConvert.DeserializeObject<ShoppingBasketViewModel>(shoppingBasket);
             return View(shoppingBasketModel);
         }
 
@@ -98,8 +98,23 @@ namespace TwinsFashion.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddToCart(ProductViewModel model)
+        public async Task<IActionResult> AddToCart(Guid id, string size, int quantity)
         {
+            if (id == Guid.Empty || string.IsNullOrEmpty(size) || quantity <= 0)
+            {
+                return BadRequest("Invalid product data.");
+            }
+
+            var productDto = await _productService.GetProductByIdAsync(id);
+            if (productDto == null)
+            {
+                return NotFound("Product not found.");
+            }
+
+            var model = _mapper.MapViewModelProduct(productDto);
+            model.Size = size;
+            model.Quantity = quantity;
+
             var basketJson = HttpContext.Session.GetString("Basket");
             ShoppingBasketViewModel shoppingBasketModel;
 
@@ -109,31 +124,34 @@ namespace TwinsFashion.Controllers
             }
             else
             {
-                shoppingBasketModel = JsonSerializer.Deserialize<ShoppingBasketViewModel>(basketJson);
+                shoppingBasketModel = JsonConvert.DeserializeObject<ShoppingBasketViewModel>(basketJson);
             }
 
             if (!shoppingBasketModel.Products.TryGetValue(model.Id, out var productList))
             {
-                model.Quantity = 1;
+                // Product is not in the cart yet, add it as a new list
                 shoppingBasketModel.Products[model.Id] = new List<ProductViewModel> { model };
             }
             else
             {
+                // Product is in the cart, check if the same size exists
                 var existingProduct = productList.FirstOrDefault(p => p.Size == model.Size);
                 if (existingProduct != null)
                 {
-                    // Същият размер — увеличи количеството
-                    existingProduct.Quantity++;
+                    // Same size exists, just increase the quantity
+                    existingProduct.Quantity += model.Quantity;
                 }
                 else
                 {
-                    model.Quantity = 1;
+                    // Different size, add it as a new item in the list
                     productList.Add(model);
                 }
             }
 
-            HttpContext.Session.SetString("Basket", JsonSerializer.Serialize(shoppingBasketModel));
-            return RedirectToAction("ShoppingCart");
+            HttpContext.Session.SetString("Basket", JsonConvert.SerializeObject(shoppingBasketModel));
+            
+            var newBasketQuantity = GetShoppingBasketCount();
+            return Ok(new { success = true, newQuantity = newBasketQuantity });
         }
 
         [HttpPost]
@@ -143,7 +161,7 @@ namespace TwinsFashion.Controllers
             if (string.IsNullOrEmpty(basketJson))
                 return RedirectToAction("ShoppingCart");
 
-            var shoppingBasketModel = JsonSerializer.Deserialize<ShoppingBasketViewModel>(basketJson);
+            var shoppingBasketModel = JsonConvert.DeserializeObject<ShoppingBasketViewModel>(basketJson);
 
             if (shoppingBasketModel.Products.TryGetValue(id, out var productList))
             {
@@ -156,7 +174,7 @@ namespace TwinsFashion.Controllers
                 }
             }
 
-            HttpContext.Session.SetString("Basket", JsonSerializer.Serialize(shoppingBasketModel));
+            HttpContext.Session.SetString("Basket", JsonConvert.SerializeObject(shoppingBasketModel));
             return RedirectToAction("Index", "Home");
         }
 
@@ -166,10 +184,20 @@ namespace TwinsFashion.Controllers
             int basketQuantity = 0;
             if (!string.IsNullOrEmpty(shoppingBasket))
             {
-                var shoppingBasketModel = JsonSerializer.Deserialize<ShoppingBasketViewModel>(shoppingBasket);
+                var shoppingBasketModel = JsonConvert.DeserializeObject<ShoppingBasketViewModel>(shoppingBasket);
                 basketQuantity = shoppingBasketModel.Products?.Sum(pg => pg.Value.Sum(p => p.Quantity)) ?? 0;
             }        
             return basketQuantity;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ProductDetails(Guid id)
+        {
+            var product = await _productService.GetProductByIdAsync(id);
+            if (product == null)
+                return NotFound();
+            var result = _mapper.MapViewModelProduct(product);
+            return Ok(result);
         }
     }
 }

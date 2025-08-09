@@ -7,7 +7,7 @@ namespace TwinsFashion.Models.Mappings
     {
         public IEnumerable<ProductViewModel> MapViewModelProducts(IEnumerable<ProductDto> products);
 
-        public IEnumerable<SizeViewModel> MapViewModelSizes(IEnumerable<SizeDto> sizes);
+        public ICollection<string> MapViewModelSizes(IEnumerable<SizeDto> sizes);
 
         public IEnumerable<ColorViewModel> MapViewModelColors(IEnumerable<ColorDto> colors);
 
